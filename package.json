@@ -1,0 +1,19 @@
+{
+  "name": "quarto-diagram-zoom",
+  "private": true,
+  "description": "Dev tooling for the diagram-zoom Quarto extension (not published to npm).",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json && node scripts/check-version.mjs",
+    "fixtures": "node scripts/render-fixtures.mjs",
+    "test": "playwright test",
+    "gate": "pnpm run check && pnpm run fixtures && pnpm test"
+  },
+  "packageManager": "pnpm@10.18.2",
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

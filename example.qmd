@@ -1,0 +1,11 @@
+---
+title: "Diagram-zoom Example"
+filters:
+  - diagram-zoom
+---
+
+## Heading
+
+This filter adds formatting to heading text.
+
+

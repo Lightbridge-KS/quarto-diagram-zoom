@@ -1,0 +1,23 @@
+# Quarto render output
+/example.html
+/example_files/
+.quarto/
+*.docx
+
+# Test fixtures: extension installed by `pnpm run fixtures`, renders
+tests/fixtures/**/_extensions/
+tests/fixtures/**/_site/
+tests/fixtures/**/_book/
+tests/fixtures/doc/*.html
+tests/fixtures/doc/*_files/
+
+# Node / Playwright
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+
+# Playground sandbox — never commit
+_playground/
+
+.DS_Store
