@@ -12,6 +12,12 @@
   const DRAG_SLOP = 4; // px of movement before a press becomes a pan (keeps link clicks working)
   const SVG_NS = "http://www.w3.org/2000/svg";
 
+  // Last input modality, so the canvas focus ring shows for keyboard users only (browsers
+  // disagree on :focus-visible after programmatic focus). Passive bookkeeping, nothing else.
+  let lastInput = "pointer";
+  document.addEventListener("keydown", () => { lastInput = "keyboard"; }, true);
+  document.addEventListener("pointerdown", () => { lastInput = "pointer"; }, true);
+
   /**
    * @template {keyof HTMLElementTagNameMap} K
    * @param {K} tag
@@ -297,8 +303,11 @@
       if (event.key === "0") fit(true);
       else step(event.key === "-" || event.key === "_" ? 1 / STEP : STEP);
     });
+    // The canvas focus ring is for keyboard users only (Safari shows it after a tap otherwise).
+    if (lastInput === "keyboard") dialog.setAttribute("data-dz-keys", "");
     // Keep Tab inside the dialog.
     dialog.addEventListener("keydown", (event) => {
+      dialog.setAttribute("data-dz-keys", "");
       if (event.key !== "Tab") return;
       const stops = [...dialog.querySelectorAll("button, [tabindex='0']")];
       const first = /** @type {HTMLElement} */ (stops[0]);
@@ -354,7 +363,22 @@
       type: "button", class: "dz-open", "aria-label": label, title: "Enlarge diagram",
     });
     control.append(enlargeIcon());
-    control.addEventListener("click", () => enlarge(svg, { opener: control, title }));
+    const open = () => enlarge(svg, { opener: control, title });
+    control.addEventListener("click", open); // mouse and keyboard
+    // Touch and pen open on pointerup (which never fires when the touch became a scroll):
+    // iOS withholds the click when hovering changes the page — e.g. Quarto reveals a figure's
+    // anchor link on :hover. When the tap's own click does follow (within iOS's ~350 ms
+    // delay), swallow it so nothing fires twice; any later click passes untouched.
+    control.addEventListener("pointerup", (event) => {
+      if (event.pointerType === "mouse") return;
+      const tapped = event.timeStamp;
+      const swallow = (/** @type {Event} */ late) => {
+        document.removeEventListener("click", swallow, true);
+        if (late.timeStamp - tapped < 700) { late.preventDefault(); late.stopPropagation(); }
+      };
+      document.addEventListener("click", swallow, true);
+      open();
+    });
     host.append(control);
     return control;
   }

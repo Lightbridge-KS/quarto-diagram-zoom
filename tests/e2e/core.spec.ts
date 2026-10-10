@@ -168,3 +168,30 @@ test("the Enlarge button stays visible on touch-only devices", async ({ page, is
   const opacity = await enlargeButton(page, "#wide").evaluate((node) => Number(getComputedStyle(node).opacity));
   expect(opacity).toBeGreaterThan(0.5);
 });
+
+test.describe("touch activation", () => {
+  test.skip(({ isMobile }) => !isMobile, "needs a touch screen");
+
+  test("a tap opens the viewer once; its late click neither reopens nor closes it", async ({ page }) => {
+    await enlargeButton(page, "#wide").tap();
+    await expect(dialog(page)).toBeVisible();
+    await page.waitForTimeout(800); // past the window in which the tap's own click arrives
+    await expect(dialog(page)).toHaveCount(1);
+    await page.getByRole("button", { name: "Close" }).tap();
+    await expect(dialog(page)).toHaveCount(0);
+  });
+});
+
+test.describe("focus ring on the canvas", () => {
+  test.skip(({ isMobile }) => isMobile, "keyboard and mouse");
+
+  test("shows for keyboard users, not after a mouse click", async ({ page }) => {
+    await openViewer(page, "#wide");
+    await expect(dialog(page)).not.toHaveAttribute("data-dz-keys", /.*/);
+    await closeWithEscape(page); // a key press: the next viewer counts as keyboard-driven anyway
+    await page.mouse.click(5, 5); // reset to pointer modality
+    await enlargeButton(page, "#wide").focus();
+    await page.keyboard.press("Enter");
+    await expect(dialog(page)).toHaveAttribute("data-dz-keys", "");
+  });
+});

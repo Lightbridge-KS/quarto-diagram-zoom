@@ -19,13 +19,15 @@
   border-radius: .375rem;
   color: var(--dz-fg, var(--bs-body-color, CanvasText));
   background: var(--dz-bg, var(--bs-body-bg, Canvas));
-  opacity: 0;
   cursor: zoom-in;
-  transition: opacity .15s ease;
 }
 .dz-open svg { width: 1.1rem; height: 1.1rem; }
-.dz-host:hover > .dz-open, .dz-open:focus-visible { opacity: 1; }
-@media (hover: none) { .dz-open { opacity: .9; } }
+/* Reveal on hover only where a real hover exists. On touch screens the button stays put:
+   iOS treats a tap that changes the page through :hover as a hover and swallows the click. */
+@media (hover: hover) and (pointer: fine) {
+  .dz-open { opacity: 0; transition: opacity .15s ease; }
+  .dz-host:hover > .dz-open, .dz-open:focus-visible { opacity: 1; }
+}
 @media (prefers-reduced-motion: reduce) { .dz-open { transition: none; } }
 
 .dz-dialog {
@@ -95,7 +97,8 @@
   outline: 2px solid var(--dz-accent, var(--bs-primary, Highlight));
   outline-offset: 2px;
 }
-.dz-viewport:focus-visible {
+.dz-viewport:focus-visible { outline: none; }
+.dz-dialog[data-dz-keys] .dz-viewport:focus-visible {
   outline: 2px solid var(--dz-accent, var(--bs-primary, Highlight));
   outline-offset: -2px;
 }
@@ -109,6 +112,7 @@
     margin: 0;
     border-radius: 0;
   }
+  .dz-title { flex-basis: 100%; }
 }
 @media print { .dz-open, .dz-dialog { display: none !important; } }
 /* Hosts that clone figures into tooltips (Quarto cross-reference previews) carry a dead button. */
