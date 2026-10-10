@@ -1,0 +1,53 @@
+name: Demo page
+
+# Renders example.qmd and publishes it to GitHub Pages. Pull requests that touch the demo or the
+# extension only build it, so a broken demo shows before merge; pushes to main deploy it — the
+# same code `quarto add Lightbridge-KS/quarto-diagram-zoom` installs.
+
+on:
+  push:
+    branches: [main]
+    paths: ["example.qmd", "_extensions/**", ".github/workflows/pages.yml"]
+  pull_request:
+    paths: ["example.qmd", "_extensions/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  # Never cancel a deployment halfway; superseded pull-request builds may go.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: render the demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Render example.qmd as the site's index page
+        run: |
+          quarto render example.qmd
+          mkdir _site
+          mv example.html _site/index.html
+          mv example_files _site/
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: deploy to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

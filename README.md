@@ -2,11 +2,15 @@
 
 [![CI](https://github.com/Lightbridge-KS/quarto-diagram-zoom/actions/workflows/ci.yml/badge.svg)](https://github.com/Lightbridge-KS/quarto-diagram-zoom/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Demo](https://github.com/Lightbridge-KS/quarto-diagram-zoom/actions/workflows/pages.yml/badge.svg)](https://lightbridge-ks.github.io/quarto-diagram-zoom/)
 
 A [Quarto](https://quarto.org) filter extension that adds an **Enlarge** button to every
 Mermaid and Graphviz diagram in HTML output. The button opens a full-window viewer where the
 diagram can be zoomed and panned — handy for wide flowcharts that a text column squeezes into
 illegibility.
+
+**[Live demo →](https://lightbridge-ks.github.io/quarto-diagram-zoom/)** (the rendered
+[example.qmd](example.qmd)).
 
 ![A Mermaid flowchart with the Enlarge button in its corner](docs/images/page.png)
 

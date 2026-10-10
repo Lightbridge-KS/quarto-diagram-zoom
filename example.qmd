@@ -1,107 +1,186 @@
 ---
-title: "Diagram Zoom Example"
+title: "diagram-zoom"
+subtitle: "Zoom and pan for Mermaid and Graphviz diagrams in Quarto"
 format:
   html:
     theme:
       light: cosmo
       dark: darkly
     toc: true
+    code-fold: true
+    code-summary: "Show the source"
+execute:
+  echo: true
 filters:
   - diagram-zoom
 ---
 
-Every Mermaid and Graphviz diagram below gets an **Enlarge** button (top-right corner, shown on
-hover or keyboard focus). In the viewer: scroll or pinch to zoom, drag to pan, `+` / `−` to
-step, `0` to fit, `Esc` to close. Toggle the light/dark switch to see the viewer follow the theme.
+::: {.callout-tip}
+## Try it
 
-## Mermaid flowchart
+Every diagram on this page has an **Enlarge** button in its top-right corner (it appears on
+hover; on touch screens it is always shown). In the viewer:
 
-@fig-request shows a request path through a small service.
+- **scroll** or **pinch** to zoom, **drag** to pan,
+- `+` / `−` to step, `0` to fit, `Esc` to close.
 
-```{mermaid}
-%%| label: fig-request
-%%| fig-cap: "Request path through a small service."
-flowchart LR
-  client([Client]) --> gw{Gateway}
-  gw -->|authenticated| router[Router]
-  gw -->|rejected| deny[401]
-  router --> handler[Handler]
-  handler --> cache[(Cache)]
-  handler --> db[(Database)]
-  cache --> resp[Response]
-  db --> resp
-  resp --> log[Audit log] --> queue[Queue]
-  queue --> w1[Worker A] & w2[Worker B] --> sink[(Archive)]
+Toggle light/dark mode at the top right: the viewer follows the page theme.
+:::
+
+This page is the extension's own example, rendered. Source:
+[example.qmd](https://github.com/Lightbridge-KS/quarto-diagram-zoom/blob/main/example.qmd) ·
+repository: [Lightbridge-KS/quarto-diagram-zoom](https://github.com/Lightbridge-KS/quarto-diagram-zoom).
+
+## Install
+
+In a project root (or next to a standalone document):
+
+```bash
+quarto add Lightbridge-KS/quarto-diagram-zoom
 ```
 
-## Mermaid sequence diagram
+Then enable the filter in the document's front matter, or once in `_quarto.yml` for a whole
+book or website:
+
+```yaml
+filters:
+  - diagram-zoom
+```
+
+## A diagram too wide for the column
+
+@fig-pipeline squeezes ten steps into the text column; the labels are hard to read until it
+is enlarged.
+
+```{mermaid}
+%%| label: fig-pipeline
+%%| fig-cap: "From a .qmd file to a published page."
+flowchart LR
+  qmd[".qmd source"] --> engine{"Engine?"}
+  engine -->|"code cells"| knitr["knitr / Jupyter"]
+  engine -->|"markdown only"| md["Markdown"]
+  knitr --> md
+  md --> pandoc["Pandoc AST"]
+  pandoc --> lua["Lua filters<br/>(diagram-zoom adds its script here)"]
+  lua --> writer["HTML writer"]
+  writer --> deps["HTML dependencies<br/>JS · CSS"]
+  deps --> page["Rendered page"]
+  page --> browser["Browser: Mermaid draws,<br/>diagram-zoom attaches buttons"]
+  browser --> reader(["Reader zooms in"])
+```
+
+## A sequence diagram
+
+What happens when the reader presses **Enlarge**:
 
 ```{mermaid}
 sequenceDiagram
-  participant B as Browser
-  participant S as Server
-  participant D as Database
-  B->>S: GET /items
-  S->>D: SELECT * FROM items
-  D-->>S: rows
-  S-->>B: 200 OK (JSON)
-```
-
-## Graphviz
-
-```{dot}
-//| label: fig-pipeline
-//| fig-cap: "A build pipeline drawn with Graphviz."
-digraph pipeline {
-  rankdir=LR;
-  node [shape=box, style=rounded];
-  source -> lint -> test -> build -> package -> publish;
-  test -> coverage;
-  build -> docs;
-}
+  actor Reader
+  participant Button as Enlarge button
+  participant Viewer as diagram-zoom viewer
+  participant SVG as Diagram SVG
+  Reader->>Button: click / tap / Enter
+  Button->>Viewer: enlarge(svg)
+  Viewer->>SVG: move into a modal dialog
+  Reader->>Viewer: wheel, pinch, drag, + / − / 0
+  Viewer->>SVG: resize (vector stays sharp)
+  Reader->>Viewer: Esc / Close
+  Viewer->>SVG: move back, restore attributes
+  Viewer->>Button: return focus
 ```
 
 ## In a tabset
 
 ::: {.panel-tabset}
 
-### Class diagram
+### Mermaid class diagram
 
 ```{mermaid}
 classDiagram
-  class Viewer {
-    +enlarge(svg)
-    +attach(svg)
-    +observe(root)
+  class DiagramZoom {
+    +enlarge(svg, options)
+    +attach(svg, options) button
+    +observe(root, options) handle
   }
-  class Dialog
-  Viewer --> Dialog : opens
+  class Viewer {
+    -zoom
+    +fit()
+    +step(factor)
+    +close()
+  }
+  class QuartoGlue {
+    +match(svg) bool
+  }
+  DiagramZoom --> Viewer : opens
+  QuartoGlue --> DiagramZoom : observe(document, match)
 ```
 
-### Dependency graph
+### Graphviz dependency graph
 
 ```{dot}
-digraph deps {
+digraph files {
   rankdir=LR;
-  node [shape=box, style=rounded];
+  node [shape=box, style=rounded, fontname="Helvetica"];
   "diagram-zoom.lua" -> "diagram-zoom.js";
-  "diagram-zoom.lua" -> "diagram-zoom-quarto.js";
   "diagram-zoom.lua" -> "diagram-zoom.css";
+  "diagram-zoom.lua" -> "diagram-zoom-quarto.js";
   "diagram-zoom-quarto.js" -> "diagram-zoom.js" [label="observe()"];
 }
 ```
 
 :::
 
+## An entity-relationship diagram
+
+```{mermaid}
+erDiagram
+  BOOK ||--|{ CHAPTER : contains
+  CHAPTER ||--o{ FIGURE : holds
+  FIGURE ||--o| DIAGRAM : "may be"
+  DIAGRAM ||--|| VIEWER : "opens in"
+  BOOK {
+    string title
+    string output
+  }
+  DIAGRAM {
+    string kind "mermaid or graphviz"
+    bool zoomable
+  }
+```
+
+## Graphviz
+
+```{dot}
+//| label: fig-states
+//| fig-cap: "The viewer's input model, drawn with Graphviz."
+digraph viewer {
+  rankdir=LR;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  closed [label="Page"];
+  open [label="Viewer open\n(fitted)"];
+  zoomed [label="Zoomed"];
+  panned [label="Panned"];
+  closed -> open [label="Enlarge"];
+  open -> zoomed [label="wheel · pinch · +"];
+  zoomed -> zoomed [label="wheel · pinch · + / −"];
+  zoomed -> panned [label="drag · arrows"];
+  panned -> zoomed [label="wheel · pinch"];
+  zoomed -> open [label="0 · Fit"];
+  open -> closed [label="Esc · Close"];
+  zoomed -> closed [label="Esc · Close"];
+  panned -> closed [label="Esc · Close"];
+}
+```
+
 ## Opting out
 
-Wrap a diagram in a `.no-zoom` div to leave it without a button:
+Wrap a diagram in a `.no-zoom` div and it keeps its normal rendering, without a button:
 
 ::: {.no-zoom}
 
 ```{mermaid}
 flowchart LR
-  small --> diagram
+  small --> nobutton["no button"]
 ```
 
 :::
