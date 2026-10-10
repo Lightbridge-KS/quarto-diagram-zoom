@@ -1,0 +1,8 @@
+# Mermaid
+
+```{mermaid}
+%%| label: fig-book-flow
+%%| fig-cap: "A chapter flowchart."
+flowchart LR
+  chapter --> diagram --> viewer
+```

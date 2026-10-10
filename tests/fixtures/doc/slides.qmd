@@ -1,0 +1,13 @@
+---
+title: Slides
+format: revealjs
+filters:
+  - diagram-zoom
+---
+
+## A slide
+
+```{mermaid}
+flowchart LR
+  not --> touched
+```

@@ -1,0 +1,12 @@
+---
+title: Diagrams
+---
+
+```{mermaid}
+flowchart LR
+  site --> page --> diagram
+```
+
+```{dot}
+digraph { website -> drawing; }
+```

@@ -1,0 +1,3 @@
+# Preface {.unnumbered}
+
+A book whose chapters hold diagrams.

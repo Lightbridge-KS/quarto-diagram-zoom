@@ -1,0 +1,13 @@
+---
+title: Mermaid as SVG
+format:
+  html:
+    mermaid-format: svg
+filters:
+  - diagram-zoom
+---
+
+```{mermaid}
+flowchart LR
+  rendered --> at_build_time
+```

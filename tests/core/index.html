@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>diagram-zoom core</title>
+  <link rel="stylesheet" href="../../_extensions/diagram-zoom/diagram-zoom.css">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1rem; }
+    .frame { max-width: 600px; }
+    .spacer { height: 2000px; }
+  </style>
+</head>
+<body>
+  <!-- A host page with no Quarto: the core must work on plain HTML. -->
+  <figure>
+    <div class="frame" id="wide-host">
+      <svg id="wide" viewBox="0 0 2000 400" width="100%" role="img" aria-label="Wide diagram">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z"></path>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="2000" height="400" fill="#f4f4f4"></rect>
+        <a href="#linked" id="link"><rect x="100" y="150" width="200" height="100" fill="#cde"></rect><text x="200" y="205" text-anchor="middle">Link</text></a>
+        <line x1="300" y1="200" x2="1500" y2="200" stroke="#333" marker-end="url(#arrow)"></line>
+        <g id="target"><rect x="1500" y="150" width="200" height="100" fill="#edc"></rect><text x="1600" y="205" text-anchor="middle">Target</text></g>
+      </svg>
+    </div>
+    <figcaption>Wide test diagram</figcaption>
+  </figure>
+
+  <div id="small-host"><svg id="small" viewBox="0 0 200 100" width="200"><rect width="200" height="100" fill="#cde"></rect></svg></div>
+  <div class="no-zoom"><svg id="skipped" viewBox="0 0 200 100" width="200"><rect width="200" height="100"></rect></svg></div>
+  <div><svg id="outer" viewBox="0 0 300 300" width="300"><svg id="nested" viewBox="0 0 10 10" width="10"></svg></svg></div>
+  <div class="spacer"></div>
+
+  <script src="../../_extensions/diagram-zoom/diagram-zoom.js"></script>
+  <script>window.__observer = window.DiagramZoom.observe(document);</script>
+</body>
+</html>

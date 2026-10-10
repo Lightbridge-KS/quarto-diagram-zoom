@@ -21,3 +21,6 @@ blob-report/
 _playground/
 
 .DS_Store
+
+# Local agent-harness state
+.claude/

@@ -1,0 +1,15 @@
+---
+title: Dark mode
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+filters:
+  - diagram-zoom
+---
+
+```{mermaid}
+flowchart LR
+  light --> dark
+```

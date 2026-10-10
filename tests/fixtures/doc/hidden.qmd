@@ -1,0 +1,34 @@
+---
+title: Hidden containers
+filters:
+  - diagram-zoom
+---
+
+```{mermaid}
+flowchart LR
+  visible --> first
+```
+
+::: {.panel-tabset}
+
+### One
+
+Text only.
+
+### Two
+
+```{mermaid}
+flowchart LR
+  hidden -->|labelled edge| tab
+```
+
+:::
+
+::: {.callout-note collapse="true"}
+## Collapsed
+
+```{mermaid}
+flowchart LR
+  inside --> callout
+```
+:::

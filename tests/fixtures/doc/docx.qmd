@@ -1,0 +1,8 @@
+---
+title: Word
+format: docx
+filters:
+  - diagram-zoom
+---
+
+The filter must leave non-HTML formats untouched.

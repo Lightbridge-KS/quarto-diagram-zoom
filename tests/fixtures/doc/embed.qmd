@@ -1,0 +1,17 @@
+---
+title: Embedded resources
+format:
+  html:
+    embed-resources: true
+filters:
+  - diagram-zoom
+---
+
+```{mermaid}
+flowchart LR
+  single --> file
+```
+
+```{dot}
+digraph { self -> contained; }
+```

@@ -360,13 +360,15 @@
   }
 
   /**
-   * True when an SVG may get a button: a top-level diagram, not opted out, not already open.
+   * True when an SVG may get a button: a top-level, non-decorative SVG that is not opted out,
+   * not open in the viewer, and not part of the viewer's own UI (the button icon is an SVG).
    * @param {SVGSVGElement} svg
    */
   function eligible(svg) {
     return !svg.hasAttribute("data-dz-attached")
-      && !svg.parentElement?.closest("svg, .no-zoom, .dz-dialog")
-      && !svg.classList.contains("no-zoom");
+      && svg.getAttribute("aria-hidden") !== "true"
+      && !svg.classList.contains("no-zoom")
+      && !svg.parentElement?.closest("svg, .no-zoom, .dz-dialog, .dz-open");
   }
 
   /**

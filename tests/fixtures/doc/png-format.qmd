@@ -1,0 +1,13 @@
+---
+title: Mermaid as PNG
+format:
+  html:
+    mermaid-format: png
+filters:
+  - diagram-zoom
+---
+
+```{mermaid}
+flowchart LR
+  raster --> image
+```

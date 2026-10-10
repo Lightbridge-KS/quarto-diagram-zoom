@@ -1,0 +1,53 @@
+---
+title: Basic
+filters:
+  - diagram-zoom
+---
+
+See @fig-flow for the flow.
+
+```{mermaid}
+%%| label: fig-flow
+%%| fig-cap: "Flow under test."
+flowchart LR
+  A[Start] --> B{Check}
+  B -->|yes| C[Done]
+  B -->|no| D[Retry] --> A
+```
+
+```{mermaid}
+sequenceDiagram
+  participant A
+  participant B
+  A->>B: hello
+  B-->>A: hi
+```
+
+```{dot}
+//| label: fig-dot
+//| fig-cap: "Graphviz under test."
+digraph { a -> b -> c; b -> d; }
+```
+
+::: {.panel-tabset}
+
+### One
+
+Text only.
+
+### Two
+
+```{dot}
+digraph { x -> y -> z; }
+```
+
+:::
+
+::: {.no-zoom}
+
+```{mermaid}
+flowchart LR
+  skip --> me
+```
+
+:::
