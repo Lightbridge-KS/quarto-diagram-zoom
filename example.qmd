@@ -9,6 +9,22 @@ format:
     toc: true
     code-fold: true
     code-summary: "Show the source"
+    # A GitHub link beside Quarto's light/dark toggle (absolute, top-right; Bootstrap Icons
+    # ship with every Quarto HTML page). Demo page only, not part of the extension.
+    include-in-header:
+      text: |
+        <style>
+          .demo-repo-link {
+            position: absolute; top: 1em; right: 2.75em; z-index: 1;
+            color: var(--bs-body-color); opacity: .7; font-size: 1.15rem; line-height: 1;
+          }
+          .demo-repo-link:hover, .demo-repo-link:focus-visible { opacity: 1; color: var(--bs-body-color); }
+          @media print { .demo-repo-link { display: none; } }
+        </style>
+    include-before-body:
+      text: |
+        <a class="demo-repo-link" href="https://github.com/Lightbridge-KS/quarto-diagram-zoom"
+           aria-label="Source on GitHub" title="Source on GitHub"><i class="bi bi-github" aria-hidden="true"></i></a>
 execute:
   echo: true
 filters:
@@ -27,9 +43,10 @@ hover; on touch screens it is always shown). In the viewer:
 Toggle light/dark mode at the top right: the viewer follows the page theme.
 :::
 
-This page is the extension's own example, rendered. Source:
-[example.qmd](https://github.com/Lightbridge-KS/quarto-diagram-zoom/blob/main/example.qmd) ·
-repository: [Lightbridge-KS/quarto-diagram-zoom](https://github.com/Lightbridge-KS/quarto-diagram-zoom).
+This page is the extension's own example, rendered.
+
+- Source: [example.qmd](https://github.com/Lightbridge-KS/quarto-diagram-zoom/blob/main/example.qmd)
+- Repository: [Lightbridge-KS/quarto-diagram-zoom](https://github.com/Lightbridge-KS/quarto-diagram-zoom)
 
 ## Install
 
