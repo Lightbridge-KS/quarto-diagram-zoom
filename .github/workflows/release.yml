@@ -1,0 +1,58 @@
+name: Release
+
+# The release button is the tag: `git tag -a vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z`.
+# Flow: tag == _extension.yml version + full gate -> draft GitHub release with the CHANGELOG
+# section as notes. A maintainer reviews and publishes the draft.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: version guard + full gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Tag must match the extension version
+        run: node scripts/check-version.mjs --tag "$GITHUB_REF_NAME"
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: Allow Chrome's sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - run: pnpm run gate
+
+  github-release:
+    name: draft GitHub release
+    needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Extract release notes from CHANGELOG
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { flag = 1; next }
+            /^## \[/ { flag = 0 }
+            flag && /^\[.*\]: http/ { next }
+            flag { print }
+          ' CHANGELOG.md > notes.md
+          test -s notes.md || echo "_See CHANGELOG.md_" > notes.md
+          cat notes.md
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag \
+            --title "diagram-zoom $GITHUB_REF_NAME" --notes-file notes.md

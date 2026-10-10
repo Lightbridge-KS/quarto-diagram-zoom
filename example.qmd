@@ -30,10 +30,8 @@ flowchart LR
   handler --> db[(Database)]
   cache --> resp[Response]
   db --> resp
-  subgraph workers [Background workers]
-    queue[Queue] --> w1[Worker A] & w2[Worker B] --> sink[Sink]
-  end
-  resp --> queue
+  resp --> log[Audit log] --> queue[Queue]
+  queue --> w1[Worker A] & w2[Worker B] --> sink[(Archive)]
 ```
 
 ## Mermaid sequence diagram

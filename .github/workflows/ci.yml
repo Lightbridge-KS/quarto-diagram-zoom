@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check (types + versions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
+
+  e2e:
+    name: e2e (Quarto ${{ matrix.quarto }}, ${{ matrix.browsers }})
+    runs-on: ubuntu-latest
+    # Pre-release Quarto is an early warning, not a gate.
+    continue-on-error: ${{ matrix.quarto == 'pre-release' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { quarto: release, browsers: all }
+          - { quarto: 1.6.43, browsers: chromium } # the quarto-required floor
+          - { quarto: pre-release, browsers: chromium }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: ${{ matrix.quarto }}
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps ${{ matrix.browsers == 'all' && 'chromium firefox webkit' || 'chromium' }}
+      # Quarto drives Chrome to render mermaid-format svg/png fixtures; Ubuntu 24.04 blocks
+      # Chrome's sandbox for unprivileged users unless this is relaxed.
+      - name: Allow Chrome's sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - run: quarto --version
+      - run: pnpm run fixtures
+      - name: Playwright
+        run: pnpm exec playwright test ${{ matrix.browsers == 'all' && ' ' || '--project=chromium --project=chromium-mobile' }}
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-${{ matrix.quarto }}
+          path: test-results/
+          retention-days: 7
