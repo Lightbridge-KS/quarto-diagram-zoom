@@ -1,11 +1,109 @@
 ---
-title: "Diagram-zoom Example"
+title: "Diagram Zoom Example"
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    toc: true
 filters:
   - diagram-zoom
 ---
 
-## Heading
+Every Mermaid and Graphviz diagram below gets an **Enlarge** button (top-right corner, shown on
+hover or keyboard focus). In the viewer: scroll or pinch to zoom, drag to pan, `+` / `−` to
+step, `0` to fit, `Esc` to close. Toggle the light/dark switch to see the viewer follow the theme.
 
-This filter adds formatting to heading text.
+## Mermaid flowchart
 
+@fig-request shows a request path through a small service.
 
+```{mermaid}
+%%| label: fig-request
+%%| fig-cap: "Request path through a small service."
+flowchart LR
+  client([Client]) --> gw{Gateway}
+  gw -->|authenticated| router[Router]
+  gw -->|rejected| deny[401]
+  router --> handler[Handler]
+  handler --> cache[(Cache)]
+  handler --> db[(Database)]
+  cache --> resp[Response]
+  db --> resp
+  subgraph workers [Background workers]
+    queue[Queue] --> w1[Worker A] & w2[Worker B] --> sink[Sink]
+  end
+  resp --> queue
+```
+
+## Mermaid sequence diagram
+
+```{mermaid}
+sequenceDiagram
+  participant B as Browser
+  participant S as Server
+  participant D as Database
+  B->>S: GET /items
+  S->>D: SELECT * FROM items
+  D-->>S: rows
+  S-->>B: 200 OK (JSON)
+```
+
+## Graphviz
+
+```{dot}
+//| label: fig-pipeline
+//| fig-cap: "A build pipeline drawn with Graphviz."
+digraph pipeline {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  source -> lint -> test -> build -> package -> publish;
+  test -> coverage;
+  build -> docs;
+}
+```
+
+## In a tabset
+
+::: {.panel-tabset}
+
+### Class diagram
+
+```{mermaid}
+classDiagram
+  class Viewer {
+    +enlarge(svg)
+    +attach(svg)
+    +observe(root)
+  }
+  class Dialog
+  Viewer --> Dialog : opens
+```
+
+### Dependency graph
+
+```{dot}
+digraph deps {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  "diagram-zoom.lua" -> "diagram-zoom.js";
+  "diagram-zoom.lua" -> "diagram-zoom-quarto.js";
+  "diagram-zoom.lua" -> "diagram-zoom.css";
+  "diagram-zoom-quarto.js" -> "diagram-zoom.js" [label="observe()"];
+}
+```
+
+:::
+
+## Opting out
+
+Wrap a diagram in a `.no-zoom` div to leave it without a button:
+
+::: {.no-zoom}
+
+```{mermaid}
+flowchart LR
+  small --> diagram
+```
+
+:::
